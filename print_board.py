@@ -33,6 +33,9 @@ class PrintBoardThread(Thread):
             print(self.board)
             print('\rFrames elapsed %d' % self.seconds)
             print('\r%s\r' % self.stringa_comandi)
+            if self.board.is_dead:
+                print('\rYOU DIED!\r')
+                break
             self.seconds += 1
             time.sleep(self.refresh_rate_ms / 1000)
         return
@@ -44,20 +47,18 @@ class Board(object):
         self.width = width
         self.height = height
         self.__board = []
-        self.__board.append(list('#' * self.width))
+        self.__board.append(list('\u2588' + '\u2588' * (self.width - 2) + '\u2588'))
         for i in range(self.height - 2):
-            self.__board.append(list('#' + ' ' * (self.width - 2) + '#'))
-        self.__board.append(list('#' * self.width))
+            self.__board.append(list('\u2588' + ' ' * (self.width - 2) + '\u2588'))
+        self.__board.append(list('\u2588' + '\u2588' * (self.width - 2) + '\u2588'))
         self.points = []
         self.last_direction = None
+        self.is_dead = False
 
     def __repr__(self):
         ret_val = '\r'
         for line in self.__board:
             ret_val += ''.join(line) + '\r\n'
-        ret_val += '%d\r\n' % len(self.points)
-        for p in self.points:
-            ret_val +=  '%r\r\n' % p
         return ret_val
 
     def add_point(self, point):
@@ -70,9 +71,19 @@ class Board(object):
         if isinstance(last_point, Point):
             self.__board[last_point.y][last_point.x] = ' '
 
+    def point_is_over_borders(self, point):
+        return (
+            point.x == 0
+            or
+            point.x == self.width - 1
+            or
+            point.y == 0
+            or
+            point.y == self.height - 1
+        )
+
     def move_points(self, direction):
         new_point = Point(self.points[-1].x, self.points[-1].y)
-        print('%r - %r' % (self.last_direction, direction))
         if not (
             (self.last_direction == 'right' and direction == 'left')
             or
@@ -84,6 +95,8 @@ class Board(object):
         ):
             self.last_direction = direction
         new_point.move(self.last_direction)
+        if self.point_is_over_borders(new_point):
+            self.is_dead = True
         self.add_point(new_point)
         self.remove_last_point()
 
