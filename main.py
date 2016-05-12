@@ -8,9 +8,9 @@ def main():
     k = None
     field_width = 80
     field_height = 30
-    if len(sys.argv) > 1 and int(sys.argv[1]) > 50:
+    if len(sys.argv) > 1 and int(sys.argv[1]) >= 20:
         field_width = int(sys.argv[1])
-        if len(sys.argv) > 2 and int(sys.argv[2]) > 20:
+        if len(sys.argv) > 2 and int(sys.argv[2]) >= 10:
             field_height = int(sys.argv[2])
     print('field_width  %d' % field_width)
     print('field_height %d' % field_height)
@@ -19,7 +19,7 @@ def main():
         field_width,
         field_height,
         'Input direction or press "q" to quit',
-        250)
+        100)
     thread.daemon = True
     thread.start()
 
